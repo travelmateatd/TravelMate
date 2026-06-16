@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TravelMate — Taxi Booking</title>
+  <meta name="description" content="Book reliable taxis at transparent per-km rates. Economy, Sedan & SUV available." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Leaflet CSS (OpenStreetMap) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <i class="fa-solid fa-taxi"></i>
+        <span class="logo-text">TravelMate</span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#cars">Fleet</a></li>
+        <li><a href="#booking">Book</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+        </button>
+        <button class="btn-primary btn-sm" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">
+          Book Now
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-overlay"></div>
+    <div class="road-lines" aria-hidden="true">
+      <div class="line"></div><div class="line"></div><div class="line"></div>
+    </div>
+    <div class="hero-content">
+      <span class="hero-eyebrow">Available 24 / 7</span>
+      <h1 class="hero-headline">Your Ride,<br /><span class="accent">Your Price.</span></h1>
+      <p class="hero-sub">Transparent per-km fares for cars. Vans &amp; buses on request. Book in 60 seconds.</p>
+      <div class="hero-cta-group">
+        <button class="btn-primary btn-lg" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">
+          <i class="fa-solid fa-location-arrow"></i> Book a Ride
+        </button>
+        <button class="btn-ghost btn-lg" onclick="document.getElementById('cars').scrollIntoView({behavior:'smooth'})">
+          View Fleet <i class="fa-solid fa-chevron-down"></i>
+        </button>
+      </div>
+      <div class="hero-badges">
+        <div class="badge"><i class="fa-solid fa-shield-halved"></i> Verified Drivers</div>
+        <div class="badge"><i class="fa-solid fa-bolt"></i> Instant Confirm</div>
+        <div class="badge"><i class="fa-brands fa-whatsapp"></i> WhatsApp Booking</div>
+        <div class="badge"><i class="fa-solid fa-map"></i> Live Map Distance</div>
+      </div>
+    </div>
+    <div class="hero-car-card" aria-hidden="true">
+      <div class="car-card-inner">
+        <i class="fa-solid fa-car-side car-icon-big"></i>
+        <div>
+          <div class="car-card-label">Starting from</div>
+          <div class="car-card-price">60 <span>PKR/km</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLEET -->
+  <section class="section" id="cars">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">Choose Your Ride</span>
+        <h2 class="section-title">Our Fleet</h2>
+        <p class="section-sub">Pick the vehicle that fits your journey and budget.</p>
+      </div>
+      <div class="cars-grid" id="carsGrid"></div>
+    </div>
+  </section>
+
+  <!-- BOOKING FORM + MAP + FARE -->
+  <section class="section section-alt" id="booking">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">Reserve Your Seat</span>
+        <h2 class="section-title">Book a Ride</h2>
+        <p class="section-sub">Type your locations — the map pins them and calculates distance automatically.</p>
+      </div>
+
+      <div class="booking-layout">
+
+        <!-- LEFT: Form -->
+        <div class="booking-form-wrap">
+          <form class="booking-form" id="bookingForm" novalidate>
+
+            <!-- Selected car pill -->
+            <div class="selected-car-pill" id="selectedCarPill">
+              <i class="fa-solid fa-car"></i>
+              <span id="selectedCarName">No car selected — choose from fleet above</span>
+            </div>
+
+            <!-- Name + Phone -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="custName">Customer Name</label>
+                <div class="input-icon-wrap">
+                  <i class="fa-solid fa-user"></i>
+                  <input type="text" id="custName" placeholder="Shahid Gul" required />
+                </div>
+                <span class="field-error" id="errName"></span>
+              </div>
+              <div class="form-group">
+                <label for="custPhone">WhatsApp Number</label>
+                <div class="input-icon-wrap">
+                  <i class="fa-brands fa-whatsapp"></i>
+                  <input type="tel" id="custPhone" placeholder="+92 300 1234567" required />
+                </div>
+                <span class="field-error" id="errPhone"></span>
+              </div>
+            </div>
+
+            <!-- Pickup -->
+            <div class="form-group autocomplete-group">
+              <label for="pickup">
+                <i class="fa-solid fa-circle" style="color:#22c55e;font-size:0.6rem;vertical-align:middle;margin-right:4px;"></i>
+                Pickup Location
+              </label>
+              <div class="input-icon-wrap">
+                <i class="fa-solid fa-location-dot"></i>
+                <input type="text" id="pickup" placeholder="Type pickup city or address..." autocomplete="off" required />
+                <button type="button" class="gps-btn" id="gpsBtn" title="Use my current location">
+                  <i class="fa-solid fa-crosshairs"></i>
+                </button>
+              </div>
+              <ul class="autocomplete-list" id="pickupSuggestions"></ul>
+              <span class="field-error" id="errPickup"></span>
+            </div>
+
+            <!-- Drop-off -->
+            <div class="form-group autocomplete-group">
+              <label for="dropoff">
+                <i class="fa-solid fa-circle" style="color:#ef4444;font-size:0.6rem;vertical-align:middle;margin-right:4px;"></i>
+                Drop-off Location
+              </label>
+              <div class="input-icon-wrap">
+                <i class="fa-solid fa-flag-checkered"></i>
+                <input type="text" id="dropoff" placeholder="Type destination city or address..." autocomplete="off" required />
+              </div>
+              <ul class="autocomplete-list" id="dropoffSuggestions"></ul>
+              <span class="field-error" id="errDropoff"></span>
+            </div>
+
+            <!-- MAP -->
+            <div class="map-wrap">
+              <div id="map"></div>
+              <div class="map-status" id="mapStatus">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span id="mapStatusText">Enter pickup and drop-off to see route on map</span>
+              </div>
+            </div>
+
+            <!-- Date + Distance (auto-filled) -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="tripDate">Date</label>
+                <div class="input-icon-wrap">
+                  <i class="fa-solid fa-calendar"></i>
+                  <input type="date" id="tripDate" required />
+                </div>
+                <span class="field-error" id="errDate"></span>
+              </div>
+              <div class="form-group">
+                <label for="kilometers">
+                  Distance (km)
+                  <span class="auto-badge" id="autoBadge" style="display:none;">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-calculated
+                  </span>
+                </label>
+                <div class="input-icon-wrap">
+                  <i class="fa-solid fa-road"></i>
+                  <input type="number" id="kilometers" placeholder="Auto-filled from map" min="1" max="5000" required />
+                </div>
+                <span class="field-error" id="errKm"></span>
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- RIGHT: Fare Summary -->
+        <div class="fare-summary" id="fareSummary">
+          <div class="fare-header">
+            <i class="fa-solid fa-receipt"></i>
+            <span>Fare Estimate</span>
+          </div>
+          <div class="fare-rows">
+            <div class="fare-row">
+              <span class="fare-label">Selected Car</span>
+              <span class="fare-value" id="sumCar">—</span>
+            </div>
+            <div class="fare-row">
+              <span class="fare-label">Total Distance</span>
+              <span class="fare-value" id="sumKm">—</span>
+            </div>
+            <div class="fare-row">
+              <span class="fare-label">Rate per km</span>
+              <span class="fare-value" id="sumRate">—</span>
+            </div>
+            <div class="fare-divider"></div>
+            <div class="fare-row fare-total-row">
+              <span class="fare-label">Total Price</span>
+              <span class="fare-value fare-total" id="sumTotal">
+                <span class="odometer" id="odometer">0</span> PKR
+              </span>
+            </div>
+          </div>
+          <div class="fare-notice" id="fareNotice">Select a car and enter distance to see your fare.</div>
+
+          <button class="btn-whatsapp" id="whatsappBtn" disabled>
+            <i class="fa-brands fa-whatsapp"></i>
+            Book via WhatsApp
+          </button>
+
+          <div class="confirm-notice">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Booking is confirmed <strong>only after WhatsApp confirmation</strong> from our team. Please wait for our reply before assuming your ride is reserved.</span>
+          </div>
+
+          <p class="fare-disclaimer">Final fare confirmed by driver. Rates exclude tolls and waiting charges.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">Simple Process</span>
+        <h2 class="section-title">How It Works</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-icon"><i class="fa-solid fa-car-side"></i></div>
+          <h3>Pick Your Car</h3>
+          <p>Choose a car for per-km rides, or Hiace / Coaster for group travel.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+          <h3>Enter Locations</h3>
+          <p>Type pickup and drop-off. The map pins both spots and calculates real distance automatically.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-icon"><i class="fa-brands fa-whatsapp"></i></div>
+          <h3>Book on WhatsApp</h3>
+          <p>Hit "Book via WhatsApp." Your details are pre-filled. One tap sends the booking.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-icon"><i class="fa-solid fa-road"></i></div>
+          <h3>Enjoy Your Ride</h3>
+          <p>Your driver contacts you to confirm pickup. Sit back and travel comfortably.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section section-alt" id="faq">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">Questions</span>
+        <h2 class="section-title">Frequently Asked</h2>
+      </div>
+      <div class="faq-list" id="faqList"></div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section" id="contact">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">Reach Us</span>
+        <h2 class="section-title">Contact</h2>
+        <p class="section-sub">We are available 24/7 for bookings and enquiries.</p>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <i class="fa-brands fa-whatsapp"></i>
+          <h4>WhatsApp</h4>
+          <p id="contactWA">+92 306 5616131</p>
+        </div>
+        <div class="contact-card">
+          <i class="fa-solid fa-envelope"></i>
+          <h4>Email</h4>
+          <p>travelmate.atd@gmail.com</p>
+        </div>
+        <div class="contact-card">
+          <i class="fa-solid fa-clock"></i>
+          <h4>Hours</h4>
+          <p>24 hours / 7 days</p>
+        </div>
+        <div class="contact-card">
+          <i class="fa-solid fa-location-dot"></i>
+          <h4>Base City</h4>
+          <p>Abbottabad, Pakistan</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <a href="#" class="nav-logo">
+        <i class="fa-solid fa-taxi"></i>
+        <span class="logo-text">TravelMate</span>
+      </a>
+      <p class="footer-copy">© <span id="footerYear"></span> TravelMate. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#cars">Fleet</a>
+        <a href="#booking">Book</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <button class="back-to-top" id="backToTop" aria-label="Back to top">
+    <i class="fa-solid fa-chevron-up"></i>
+  </button>
+  <div class="toast" id="toast"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
