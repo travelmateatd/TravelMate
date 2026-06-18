@@ -21,7 +21,7 @@ const CONFIG = {
  * so no round-trip surcharge applies.
  * Add/remove city names below (case-insensitive, partial match).
  */
-const MAJOR_CITIES = ['islamabad', 'rawalpindi', 'peshawar'];
+const MAJOR_CITIES = ['islamabad', 'rawalpindi', 'peshawar', 'abbottabad'];
 
 /**
  * ✏️ TOLL CITIES — one-way fare, but at the car's flat ROUND-TRIP RATE
