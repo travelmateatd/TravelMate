@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1f14" />
+  <meta name="description" content="TravelMate — premium taxi booking with open-source maps in Pakistan." />
+  <title>TravelMate</title>
+
+  <link rel="manifest" href="./manifest.webmanifest?v=11" />
+  <link rel="icon" href="./icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TravelMate" />
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    defer
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <link rel="stylesheet" href="./styles.css?v=11" />
+  <script defer src="./app.js?v=11"></script>
+</head>
+
+<body>
+  <div id="splash" class="splash" role="status" aria-label="Loading TravelMate">
+    <div class="splash-inner">
+      <div class="splash-badge" aria-hidden="true">
+        <svg width="46" height="58" viewBox="0 0 30 40" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 0C6.7 0 0 6.7 0 15c0 10.5 15 25 15 25s15-14.5 15-25C30 6.7 23.3 0 15 0z" fill="#19e28c"/>
+          <circle cx="15" cy="15" r="6.3" fill="#ffffff"/>
+        </svg>
+      </div>
+      <div class="splash-title">TravelMate</div>
+      <div class="splash-sub">Premium rides, open maps</div>
+      <div class="splash-spinner" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <div id="app">
+    <header class="topbar" aria-label="TravelMate top bar">
+      <div class="brand" aria-label="TravelMate">
+        <div class="brand-dot" aria-hidden="true"></div>
+        <div class="brand-text">TravelMate</div>
+      </div>
+
+      <div class="topbar-actions">
+        <button id="btnInstall" class="btn btn-ghost" type="button" title="Install app" hidden>
+          <span class="icon" aria-hidden="true">⬇</span>
+          <span class="btn-label">Install</span>
+        </button>
+        <button id="btnLocate" class="btn btn-ghost" type="button" title="Use my location">
+          <span class="icon" aria-hidden="true">⌖</span>
+          <span class="btn-label">My location</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="stage" aria-label="Map and booking panel">
+      <div id="map" aria-label="Map"></div>
+
+      <section class="panel" aria-label="Booking panel">
+        <div class="panel-glass">
+          <button id="btnPanelToggle" class="panel-toggle" type="button" aria-label="Collapse options" aria-expanded="true">
+            <span class="panel-toggle-chevron" aria-hidden="true">▲</span>
+          </button>
+
+          <div class="panel-row">
+            <div class="field-group">
+              <label class="field-label" for="pickupInput">Pickup</label>
+              <div class="field">
+                <span class="field-icon" aria-hidden="true">●</span>
+                <input id="pickupInput" class="field-input" type="text" inputmode="search" autocomplete="off"
+                  placeholder="Search pickup in Pakistan…" />
+                <button id="pinPickup" class="field-pin" type="button" aria-label="Pick pickup on map" title="Pick exact location on map">📍</button>
+                <button id="clearPickup" class="field-clear" type="button" aria-label="Clear pickup">×</button>
+              </div>
+              <div id="pickupSug" class="suggestions" role="listbox" aria-label="Pickup suggestions"></div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="field-group">
+              <label class="field-label" for="dropInput">Drop</label>
+              <div class="field">
+                <span class="field-icon field-icon-drop" aria-hidden="true">■</span>
+                <input id="dropInput" class="field-input" type="text" inputmode="search" autocomplete="off"
+                  placeholder="Search drop in Pakistan…" />
+                <button id="pinDrop" class="field-pin" type="button" aria-label="Pick drop on map" title="Pick exact location on map">📍</button>
+                <button id="clearDrop" class="field-clear" type="button" aria-label="Clear drop">×</button>
+              </div>
+              <div id="dropSug" class="suggestions" role="listbox" aria-label="Drop suggestions"></div>
+            </div>
+          </div>
+
+          <div class="panel-row collapsible-row">
+            <div class="field-group">
+              <div class="field">
+                <span class="field-icon" aria-hidden="true">📞</span>
+                <input id="phoneInput" class="field-input" type="tel" inputmode="tel" autocomplete="tel"
+                  aria-label="Your phone number" placeholder="03XX XXXXXXX" maxlength="15" />
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-row panel-row-tight">
+            <div class="chips">
+              <div class="chip chip-live" id="statusChip" aria-live="polite">
+                <span class="pulse" aria-hidden="true"></span>
+                Ready
+              </div>
+
+              <div class="chip" id="metricsChip" hidden>
+                <span id="distanceText">—</span>
+                <span class="dotsep" aria-hidden="true">•</span>
+                <span id="etaText">—</span>
+              </div>
+
+              <div class="chip" id="fareChip" hidden>
+                Fare: <strong id="fareText">—</strong>
+              </div>
+
+              <div class="chip chip-warn" id="ruleChip" hidden></div>
+            </div>
+          </div>
+
+          <div class="panel-row panel-row-tight collapsible-row">
+            <div class="vehicles" role="radiogroup" aria-label="Vehicle selection">
+              <button class="vehicle-card selected" data-vehicle="Economy" role="radio" aria-checked="true" type="button">
+                <div class="v-icon" aria-hidden="true">🚗</div>
+                <div class="v-meta">
+                  <div class="v-title">Economy</div>
+                  <div class="v-sub">Smart rides</div>
+                  <div class="v-price" data-price>—</div>
+                </div>
+              </button>
+
+              <button class="vehicle-card" data-vehicle="Comfort" role="radio" aria-checked="false" type="button">
+                <div class="v-icon" aria-hidden="true">🚙</div>
+                <div class="v-meta">
+                  <div class="v-title">Comfort</div>
+                  <div class="v-sub">More space</div>
+                  <div class="v-price" data-price>—</div>
+                </div>
+              </button>
+
+              <button class="vehicle-card" data-vehicle="Luxury" role="radio" aria-checked="false" type="button">
+                <div class="v-icon" aria-hidden="true">🏁</div>
+                <div class="v-meta">
+                  <div class="v-title">Luxury</div>
+                  <div class="v-sub">Top class</div>
+                  <div class="v-price" data-price>—</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div class="panel-row panel-actions collapsible-row">
+            <a
+              id="btnWhatsApp"
+              class="btn btn-whatsapp disabled"
+              href="#"
+              role="button"
+              aria-disabled="true"
+              target="_blank"
+              rel="noopener"
+            >
+              Book your Ride via WhatsApp
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <noscript>This app requires JavaScript to run.</noscript>
+</body>
+                </html>
+                
