@@ -9,7 +9,7 @@
     COUNTRY_CODE: "pk",
     ALLOWED_CITIES: new Set(["abbottabad", "rawalpindi", "islamabad", "peshawar"]),
 
-    VEHICLE_RATES: { Economy: 65, Comfort: 75, Luxury: 150 },
+    VEHICLE_RATES: { Sedan: 70, SUV: 80 },
     WHATSAPP_NUMBER: "923065616131"
   };
 
