@@ -44,7 +44,7 @@
   const vehicleCards = Array.from(document.querySelectorAll(".vehicle-card"));
 
   function vehicleRate(name) {
-    return CFG.VEHICLE_RATES[name] || CFG.VEHICLE_RATES.Economy;
+    return CFG.VEHICLE_RATES[name] || CFG.VEHICLE_RATES.Sedan;
   }
 
   function updateVehiclePrices(distKm) {
@@ -62,7 +62,7 @@
 
   // State
   let map, pickupMarker, dropMarker, routeLine;
-  let selectedVehicle = "Economy";
+  let selectedVehicle = "Sedan";
   let pickup = null; // { name, lat, lon, cityKey, raw }
   let drop = null;
   let lastRoute = null;
@@ -811,7 +811,7 @@
         });
         card.classList.add("selected");
         card.setAttribute("aria-checked", "true");
-        selectedVehicle = card.dataset.vehicle || "Economy";
+        selectedVehicle = card.dataset.vehicle || "Sedan";
 
         if (lastRoute) {
           lastRoute.fareRs = Math.round(lastRoute.distanceKm * vehicleRate(selectedVehicle));
